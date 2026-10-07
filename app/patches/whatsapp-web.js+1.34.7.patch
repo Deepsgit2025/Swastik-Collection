@@ -1,0 +1,25 @@
+diff --git a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js b/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
+index 540078a..9f3b87e 100644
+--- a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
++++ b/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
+@@ -483,6 +483,20 @@ exports.LoadUtils = () => {
+             ...extraOptions,
+         };
+ 
++        // WhatsApp Web bug (Sept 2026, wwebjs/whatsapp-web.js#201921/#201922):
++        // mediaOptions is a Store media model whose private __x_id field collides
++        // with Msg's internal id field when its enumerable properties (and its
++        // toJSON() output, spread separately above) are merged into this new
++        // outgoing message. That clobbers this message's own id, so WhatsApp's
++        // own memoize helper later throws "Data passed to getter must include an
++        // id property ... but got undefined" and every media send fails outright,
++        // even though the session itself stays connected. Fix per the upstream
++        // PR (wwebjs/whatsapp-web.js#201923, not yet released to npm): drop it
++        // from the assembled message, after every spread that could reintroduce
++        // it — deleting it off mediaOptions beforehand is not enough, because
++        // mediaOptions.toJSON() puts it right back in on the very next line.
++        delete message.__x_id;
++
+         // Bot's won't reply if canonicalUrl is set (linking)
+         if (botOptions) {
+             delete message.canonicalUrl;

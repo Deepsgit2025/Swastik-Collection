@@ -1,0 +1,24 @@
+appId: com.swastikcollection.billing
+productName: Swastik Collection Billing
+directories:
+  output: release
+# better-sqlite3 ships prebuilt N-API binaries (ABI-stable across Node/Electron
+# versions), so no native rebuild is needed — and this machine has no VS Build
+# Tools for electron-builder to fall back to if it tried.
+npmRebuild: false
+files:
+  - dist/**
+  - dist-electron/**
+  - src/db/migrations/**/*.sql
+  - package.json
+  - public/icon.ico
+win:
+  target: nsis
+  icon: public/icon.ico
+nsis:
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: "Swastik Collection Billing"
+  installerIcon: public/icon.ico
+  uninstallerIcon: public/icon.ico
+  installerHeaderIcon: public/icon.ico

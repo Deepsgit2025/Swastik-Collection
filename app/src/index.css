@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Shared print-only pipeline (PHASE4.md section 4, reused as-is by
+ * PHASE7.md section 1's bill layout rather than building a second
+ * mechanism). Any print target wrapped in .print-sheet — LabelPrintSheet.tsx
+ * or BillPrintSheet.tsx — is hidden in the normal UI and only revealed
+ * under @media print, with everything else on the page force-hidden — the
+ * standard "print only this element" trick, so window.print() works no
+ * matter which screen it's called from without needing a separate print
+ * window/route. Each screen only ever mounts one print target with actual
+ * content at a time, so there's no risk of both being visible together.
+ * The @page size itself is NOT set here: it differs per print target (label
+ * stock size, itself a persisted setting — src/db/settings.ts — vs. the
+ * bill's fixed-width/auto-height roll) and this static stylesheet can't
+ * read either, so each print sheet component writes its own @page rule via
+ * an inline <style> tag at render time instead. Only margin: 0 is pinned
+ * globally below, since every print target wants a borderless page
+ * regardless of its dimensions. The OS print dialog's own paper-size
+ * setting should still match whatever stock/roll is loaded.
+ */
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-sheet,
+  .print-sheet * {
+    visibility: visible;
+  }
+
+  .print-sheet {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .print-label {
+    page-break-after: always;
+  }
+
+  .print-label:last-child {
+    page-break-after: auto;
+  }
+
+  @page {
+    margin: 0;
+  }
+}
